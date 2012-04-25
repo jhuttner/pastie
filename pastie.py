@@ -26,19 +26,20 @@ def read_config():
     return False
   return handle.read()
 
-def save_pastied(options, config):
+def save_pastie(options, config):
   payload = simplejson.dumps({
-    description: options.description or False,
-    #private: options.store_true or False,
+    description: options.get("description", False),
+    private: options.get("private", False),
     content: sys.stdin.readlines(),
     author: getpass.getuser() or False,
-    #expiry: convert_expiry_to_seconds(options.expiry) if options.expiry else False,
+    expiry: convert_expiry_to_seconds(options.get("expiry", False)),
   })
   jdata = json.dumps({"username":"...", "password":"..."})
-  res = urllib2.urlopen(config.server + "/pastie", payload).read()
+  res = urllib2.urlopen(config["server"] + "/pastie", payload).read()
   return res
 
 def convert_expiry_to_seconds(expiry_expr):
+  if not expiry_expr return False
   scalar = {
     "s": 1,
     "m": 60,
@@ -58,15 +59,15 @@ def main():
   elif "user" in options:
     res = urllib2.urlopen(config.server + "/pastie/user/" + options.user).read()
     res = JSON.loads(res)
-    for r in res.pasties:
-      print r.resource, "    ", r.description 
+    for r in res["pasties"]
+      print r["resource"], "    ", r["description"]
   elif "pastie_id" in options:
     res = urllib2.urlopen(config.server + "/pastie/id/" + options.pastie_id).read()
     res = JSON.loads(res)
-    print res.pastie.content
+    print res["pastie"]["content"]
   else:
-    res = save_pastied(options, config)
-    print res.pastie.resource
+    res = save_pastie(options, config)
+    print res["pastie"]["resource"]
   print
 
 if __name__ == "__main__":

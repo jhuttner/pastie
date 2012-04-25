@@ -98,8 +98,11 @@ app.post('/pastie', function(req, res) {
       if (!req.body.private) {
         client.lpush("public_pasties:", id);
       }
-      req.body.id = id;
-      res.send(JSON.dumps(req.body));
+      if (req.body.expiry) {
+        client.expire("pastie:" + id, req.body.expiry);
+      }
+      client.zadd("leaderboard", 1, req.body.author);
+      res.send(JSON.stringify({pastie: {id: id}));
     });
   });
 });
