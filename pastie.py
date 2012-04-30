@@ -31,7 +31,8 @@ parser.add_option("-x", dest="expiry",
 
 
 def read_config():
-  handle = open("config.json")
+  #print os.path.dirname(os.path.realpath(__file__))
+  handle = open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.json"))
   if not handle:
     return None
   return json.loads(handle.read())
