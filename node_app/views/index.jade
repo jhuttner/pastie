@@ -5,7 +5,7 @@ p However, Pastie runs on <b>your</b> network, so <b>you</b> control its visibil
 h2 install
 p 
   span(class="instruction") Clone
-  span git clone git://github.com/jhuttner/pastie.git
+  span git clone git://github.com/jhuttner/pastie.git ; cd pastie
 
 p 
   span(class="instruction") Edit the config
@@ -13,11 +13,11 @@ p
 
 p 
   span(class="instruction") $PATH
-  span ln -s pastie/pastie ~/bin/pastie
+  span ln -s pastie ~/bin/pastie
 
 p 
   span(class="instruction") Run the server
-  span node pastie/node_app/server.js
+  span node node_app/server.js
 
 h2 usage
 
@@ -37,7 +37,7 @@ each item, index in leaderboard
   span #{item}
   =(index !== leaderboard.length - 1 ? ", " : ".")
 
-h2 recent (without -p flag)
+h2 recent (without --private flag)
 each item in public_pasties
   p.pastie #{item.author} 
     span(style="display: inline-block; min-width: 4em")
