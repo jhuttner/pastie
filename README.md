@@ -1,4 +1,4 @@
-anpaste
+pastie
 =======
 
-Internal Paste Bin.
+A secure, internal paste bin.
