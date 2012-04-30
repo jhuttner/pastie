@@ -16,13 +16,13 @@ parser = OptionParser(description="Pastie is a secure internal paste bin.")
 
 parser.add_option("-d", "--description", dest="description",
     action="store", help="description")
-parser.add_option("-p", dest="private",
+parser.add_option("-p", "--private", dest="private",
     action="store_true", help="create private pastie")
-parser.add_option("-l", dest="user",
-    action="store", help="list pasties created by USER")
-parser.add_option("--print", dest="pastie_id",
-    action="store", help="print the pastie to stdout")
-parser.add_option("-x", dest="expiry",
+#parser.add_option("-l", dest="user",
+    #action="store", help="list pasties created by USER")
+#parser.add_option("--print", dest="pastie_id",
+    #action="store", help="print the pastie to stdout")
+parser.add_option("-x", "--expires", dest="expiry",
     action="store", help="delete the pastie in the future. E.g. 10m, 1d, 2h")
 #parser.add_option("-d", dest="delete_id",
     #action="store", help="delete the pastie")
@@ -84,16 +84,16 @@ def main():
   config = read_config()
   if not config:
     print "You must include a config file."
-  elif options.user:
-    res = urllib2.urlopen(config["host"] + "/pastie/user/" + options.user).read()
-    res = JSON.loads(res)
-    for r in res["pasties"]:
-      print r["resource"], "    ", r["description"]
-  elif options.pastie_id:
-    res = urllib2.urlopen(config["host"] + "/pastie/" + options.pastie_id).read()
-    res = JSON.loads(res)
-    print res
-    print res["pastie"]["content"]
+  #elif options.user:
+    #res = urllib2.urlopen(config["host"] + "/pastie/user/" + options.user).read()
+    #res = JSON.loads(res)
+    #for r in res["pasties"]:
+      #print r["resource"], "    ", r["description"]
+  #elif options.pastie_id:
+    #res = urllib2.urlopen(config["host"] + "/pastie/" + options.pastie_id).read()
+    #res = JSON.loads(res)
+    #print res
+    #print res["pastie"]["content"]
   else:
     res = save_pastie(options, config)
     if res["pastie"]["id"]:

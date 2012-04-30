@@ -1,6 +1,8 @@
 h1 Pastie, the secure internal paste bin.
 p Pastie  is a paste bin like gist.github.com.
-p However, Pastie runs on <b>your</b> network, so <b>you</b> control its visibility to the public Internet.
+p However, Pastie runs on <b><i><u>your</u></i></b> network, so <b><i><u>you</u></i></b> control its visibility to the public Internet.
+p
+  a(href="https://github.com/jhuttner/pastie") https://github.com/jhuttner/pastie
 
 h2 install
 p 
@@ -22,13 +24,13 @@ p
 h2 usage
 
 p $ cat sensitive.txt | pastie 
-p http://myserver.com/pastie/1xa82
+p http://your-server.com/pastie/1xa82
 
 p $ cat file.txt | pastie -d/--description "My description for this file."
 
 p $ cat expires_in_one_day.txt | pastie -x/--expires 1d 
 
-p $ cat a_bit_more_sensitive.txt | pastie --private/-p
+p $ cat a_bit_more_sensitive.txt | pastie -p/--private
 
 h2 users
 
