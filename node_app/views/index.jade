@@ -1,2 +1,51 @@
-h1= title
-p Welcome to #{title}
+h1 Pastie, the secure internal paste bin.
+p Pastie  is a paste bin like gist.github.com.
+p However, Pastie runs on *your* network, so you can control its visibility to the public Internet.
+
+h2 install
+p 
+  span(class="instruction") Clone
+  span git clone git://github.com/jhuttner/pastie
+
+p 
+  span(class="instruction") Edit the config
+  span vim config.json
+
+p 
+  span(class="instruction") $PATH it
+  span ln -s pastie/pastie ~/bin/pastie
+
+p 
+  span(class="instruction") Run the server
+  span node pastie/node_app/server.js
+
+h2 usage
+
+p $ cat sensitive.txt | pastie 
+p http://myserver.com/pastie/1xa82
+
+p $ cat optional_description.txt | pastie --description="Sample apache conf."
+
+p $ cat autodelete_in_one_day.txt | pastie -x/--expires 1d 
+
+p $ cat a_bit_more_sensitive.txt | pastie --private/-p
+
+h2 source code
+
+p Fork it on GitHub: 
+  a(href="#") http://github.com/foo
+
+h2 users
+
+ol
+each item, index in leaderboard
+  span #{item}
+  =(index !== leaderboard.length - 1 ? ", " : ".")
+
+h2 recent (without -p flag)
+each item in public_pasties
+  p.pastie #{item.author} 
+    span(style="display: inline-block; min-width: 4em")
+      a(href="#{host}/pastie/#{item.id}") #{item.id}
+    - if (item.description)
+      =" " + item.description

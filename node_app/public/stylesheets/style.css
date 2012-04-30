@@ -6,3 +6,33 @@ body {
 a {
   color: #00B7FF;
 }
+
+pre {
+  margin: 0;
+  padding: 0;
+}
+
+h2 {
+  margin-top: 1.5em;
+}
+
+span.instruction {
+  color: gray;
+  margin-right: 1em;
+  display: inline-block;
+  min-width: 7em;
+}
+
+p.pastie {
+  margin: 0;
+  padding: 0;
+}
+
+p.pastie:hover {
+  background-color: #ddd;
+}
+
+div.tight p {
+  margin: 0;
+  padding: 0;
+}

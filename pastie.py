@@ -1,21 +1,31 @@
-#!/usr/bin/pythan
+#!/usr/bin/python
 
 from optparse import OptionParser
+import os
 import sys
+import fileinput
 import getpass
+import urllib2
 
-parser = OptionParser( description="Pastie is a secure internal paste bin.")
+try:
+  import json
+except:
+  import simplejson as json
 
-#parser.add_option("-p", dest="private",
-    #action="store_true", help="create private pastie")
-parser.add_option("-u", dest="user",
+parser = OptionParser(description="Pastie is a secure internal paste bin.")
+
+parser.add_option("-d", "--description", dest="description",
+    action="store", help="description")
+parser.add_option("-p", dest="private",
+    action="store_true", help="create private pastie")
+parser.add_option("-l", dest="user",
     action="store", help="list pasties created by USER")
-parser.add_option("-s", dest="ID",
+parser.add_option("--print", dest="pastie_id",
     action="store", help="print the pastie to stdout")
-#parser.add_option("-x", dest="expression",
-    #action="store", help="delete the pastie in the future. E.g. 10m, 1d, 2h")
-parser.add_option("-d", dest="ID",
-    action="store", help="delete the pastie")
+parser.add_option("-x", dest="expiry",
+    action="store", help="delete the pastie in the future. E.g. 10m, 1d, 2h")
+#parser.add_option("-d", dest="delete_id",
+    #action="store", help="delete the pastie")
 
 (options, args) = parser.parse_args()
 
@@ -23,23 +33,37 @@ parser.add_option("-d", dest="ID",
 def read_config():
   handle = open("config.json")
   if not handle:
-    return False
-  return handle.read()
+    return None
+  return json.loads(handle.read())
 
 def save_pastie(options, config):
-  payload = simplejson.dumps({
-    description: options.get("description", False),
-    private: options.get("private", False),
-    content: sys.stdin.readlines(),
-    author: getpass.getuser() or False,
-    expiry: convert_expiry_to_seconds(options.get("expiry", False)),
-  })
-  jdata = json.dumps({"username":"...", "password":"..."})
-  res = urllib2.urlopen(config["server"] + "/pastie", payload).read()
-  return res
+  data = []
+
+  while 1:
+    s = sys.stdin.readline()
+    if not s:
+      break
+    data.append(s)
+
+  payload = {"content": ''.join(data), "author": getpass.getuser()}
+
+  if options.description:
+    payload["description"] = options.description;
+
+  if options.private:
+    payload["private"] = 1;
+
+  if options.expiry:
+    payload["expiry"] = convert_expiry_to_seconds(options.expiry)
+
+  payload = json.dumps({"pastie": payload});
+
+  #print payload
+  req = urllib2.Request(config["host"] + "/pastie", payload, {"content-type": "application/json"})
+  res = urllib2.urlopen(req).read()
+  return json.loads(res)
 
 def convert_expiry_to_seconds(expiry_expr):
-  if not expiry_expr return False
   scalar = {
     "s": 1,
     "m": 60,
@@ -50,25 +74,31 @@ def convert_expiry_to_seconds(expiry_expr):
     "y": 60*60*24*7*365,
   }[expiry_expr[-1]]
   num = int(expiry_expr[:-1])
-  return False if not num else num*scalar
+  if not num:
+    return False
+  else:
+    return num*scalar
 
 def main():
   config = read_config()
   if not config:
     print "You must include a config file."
-  elif "user" in options:
-    res = urllib2.urlopen(config.server + "/pastie/user/" + options.user).read()
+  elif options.user:
+    res = urllib2.urlopen(config["host"] + "/pastie/user/" + options.user).read()
     res = JSON.loads(res)
-    for r in res["pasties"]
+    for r in res["pasties"]:
       print r["resource"], "    ", r["description"]
-  elif "pastie_id" in options:
-    res = urllib2.urlopen(config.server + "/pastie/id/" + options.pastie_id).read()
+  elif options.pastie_id:
+    res = urllib2.urlopen(config["host"] + "/pastie/" + options.pastie_id).read()
     res = JSON.loads(res)
+    print res
     print res["pastie"]["content"]
   else:
     res = save_pastie(options, config)
-    print res["pastie"]["resource"]
-  print
+    if res["pastie"]["id"]:
+      print os.path.join(config["host"], "pastie", res["pastie"]["id"])
+    elif res["error"]:
+      print res["error"]
 
 if __name__ == "__main__":
   main()
