@@ -64,9 +64,10 @@ app.get('/', function(req, res) {
   config = read_config()
   client.zrangebyscore("leaderboard", "-inf", "+inf", function(err, users) {
     client.lrange("public_pasties", 0, 20, function(err, public_pasties) {
-      if (err) { console.log(err); }
+      if (err) { 
+				return res.send(err); 
+			}
       var remaining = public_pasties.length;
-      console.log("remaining start", remaining);
       if (!public_pasties.length) {
         res.render("index.jade", {
           title: "Pastie",
@@ -79,7 +80,6 @@ app.get('/', function(req, res) {
           client.hgetall("pastie:" + id, function(err, result) {
             public_pasties.push(result);
             remaining -= 1;
-            console.log("remaining now", remaining);
             if (!remaining) {
               res.render("index.jade", {
                 title: "Pastie",
@@ -97,19 +97,19 @@ app.get('/', function(req, res) {
 
 app.get('/pastie/:id', function(req, res) {
   client.hgetall("pastie:" + req.params.id, function(err, result) {
-    if (err) { console.log(err); }
+    if (err) { 
+			return res.send(err); 
+		}
     res.setHeader("content-type", "text/plain");
     res.send(result.content);
   });
 });
 
 app.post('/pastie', function(req, res) {
-  console.log(req.body);
   var fn = function() {
     var id = get_random_string(5);
     client.exists("pastie:" + id, function(err, exists) {
       if (exists) {
-        console.log("exists", id);
         return fn();
       } else {
         var pastie = req.body.pastie;
@@ -122,9 +122,9 @@ app.post('/pastie', function(req, res) {
         pastie.created = (new Date()).getTime();
 
         client.hmset("pastie:" + id, pastie, function(err, result) {
-          if (err) {
-            return cb(err);
-          }
+          if (err) { 
+						return res.send(err); 
+					}
           client.lpush("user_pasties:" + pastie.user, id, function(err, result) {
             if (err) {
               return cb(err);
