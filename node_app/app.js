@@ -65,8 +65,8 @@ app.get('/', function(req, res) {
   client.zrangebyscore("leaderboard", "-inf", "+inf", function(err, users) {
     client.lrange("public_pasties", 0, 20, function(err, public_pasties) {
       if (err) { 
-				return res.send(err); 
-			}
+        return res.send(err); 
+      }
       var remaining = public_pasties.length;
       if (!public_pasties.length) {
         res.render("index.jade", {
@@ -98,8 +98,8 @@ app.get('/', function(req, res) {
 app.get('/pastie/:id', function(req, res) {
   client.hgetall("pastie:" + req.params.id, function(err, result) {
     if (err) { 
-			return res.send(err); 
-		}
+      return res.send(err); 
+    }
     res.setHeader("content-type", "text/plain");
     res.send(result.content);
   });
@@ -123,8 +123,8 @@ app.post('/pastie', function(req, res) {
 
         client.hmset("pastie:" + id, pastie, function(err, result) {
           if (err) { 
-						return res.send(err); 
-					}
+            return res.send(err); 
+          }
           client.lpush("user_pasties:" + pastie.user, id, function(err, result) {
             if (err) {
               return cb(err);
