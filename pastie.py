@@ -18,12 +18,16 @@ parser.add_option("-d", "--description", dest="description",
     action="store", help="description")
 parser.add_option("-p", "--private", dest="private",
     action="store_true", help="create private pastie")
-#parser.add_option("-l", dest="user",
-    #action="store", help="list pasties created by USER")
-#parser.add_option("--print", dest="pastie_id",
-    #action="store", help="print the pastie to stdout")
+parser.add_option("-t", "--topic", dest="topic",
+    action="store", help="append to a pastie topic thread")
+parser.add_option("--print", dest="print_id",
+    action="store", help="print the pastie to stdout")
+parser.add_option("--print-topic", dest="print_topic",
+    action="store", help="print the pastie topic thread to stdout")
 parser.add_option("-x", "--expires", dest="expiry",
     action="store", help="delete the pastie in the future. E.g. 10m, 1d, 2h")
+#parser.add_option("-l", dest="user",
+    #action="store", help="list pasties created by USER")
 #parser.add_option("-d", dest="delete_id",
     #action="store", help="delete the pastie")
 
@@ -57,10 +61,14 @@ def save_pastie(options, config):
   if options.expiry:
     payload["expiry"] = convert_expiry_to_seconds(options.expiry)
 
+  if options.topic:
+    payload["topic"] = options.topic
+
   payload = json.dumps({"pastie": payload});
 
   #print payload
-  req = urllib2.Request(config["host"] + "/pastie", payload, {"content-type": "application/json"})
+  url = "%s:%d/pastie" % (config["host"], config["port"])
+  req = urllib2.Request(url, payload, {"content-type": "application/json"})
   res = urllib2.urlopen(req).read()
   return json.loads(res)
 
@@ -94,10 +102,19 @@ def main():
     #res = JSON.loads(res)
     #print res
     #print res["pastie"]["content"]
+  elif options.print_id:
+    url = "%s:%d/pastie/%s" % (config["host"], config["port"], options.print_id)
+    res = urllib2.urlopen(url).read()
+    print res
+  elif options.print_topic:
+    url = "%s:%d/pastie/topic/%s" % (config["host"], config["port"], options.print_topic)
+    res = urllib2.urlopen(url).read()
+    print res
   else:
     res = save_pastie(options, config)
     if res["pastie"]["id"]:
-      print os.path.join(config["host"], "pastie", res["pastie"]["id"])
+      url = "%s:%d/pastie/%s" % (config["host"], config["port"], res["pastie"]["id"])
+      print url
     elif res["error"]:
       print res["error"]
 

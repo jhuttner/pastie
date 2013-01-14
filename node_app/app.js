@@ -61,7 +61,7 @@ app.get('/pastie/user/:user', function(req, res){
 });
 
 app.get('/', function(req, res) {
-  config = read_config()
+  var config = read_config();
   client.zrangebyscore("leaderboard", "-inf", "+inf", function(err, users) {
     client.lrange("public_pasties", 0, 20, function(err, public_pasties) {
       if (err) { 
@@ -71,7 +71,7 @@ app.get('/', function(req, res) {
       if (!public_pasties.length) {
         res.render("index.jade", {
           title: "Pastie",
-          host: config.host,
+          host: config.host + ":" + config.port,
           leaderboard: users,
           public_pasties: public_pasties,
         });
@@ -83,7 +83,7 @@ app.get('/', function(req, res) {
             if (!remaining) {
               res.render("index.jade", {
                 title: "Pastie",
-                host: config.host,
+                host: config.host + ":" + config.port,
                 leaderboard: users,
                 public_pasties: public_pasties,
               });
@@ -102,6 +102,32 @@ app.get('/pastie/:id', function(req, res) {
     }
     res.setHeader("content-type", "text/plain");
     res.send(result.content);
+  });
+});
+
+app.get('/pastie/topic/:topic', function(req, res) {
+  client.lrange("pastie_topic:" + req.params.topic, 0, -1, function(err, result) {
+    if (err) {
+      return res.send(err);
+    }
+
+    var batch_cmds = client.multi();
+    _.each(result, function(pastie_id) {
+        batch_cmds.hgetall("pastie:" + pastie_id);
+    });
+    // Execute the batch command and send the text content
+    batch_cmds.exec(function(error, responses) {
+        if (error) {
+          return res.send(error);
+        }
+        var output = "";
+        _.each(responses, function(r) {
+            var str = r.author + ": " + r.content;
+            output = output + str;
+        });
+        res.setHeader("content-type", "text/plain");
+        res.send(output);
+    });
   });
 });
 
@@ -125,7 +151,7 @@ app.post('/pastie', function(req, res) {
           if (err) { 
             return res.send(err); 
           }
-          client.lpush("user_pasties:" + pastie.user, id, function(err, result) {
+          client.lpush("user_pasties:" + pastie.author, id, function(err, result) {
             if (err) {
               return cb(err);
             }
@@ -134,6 +160,9 @@ app.post('/pastie', function(req, res) {
             }
             if (pastie.expiry) {
               client.expire("pastie:" + id, pastie.expiry);
+            }
+            if (pastie.topic) {
+              client.lpush("pastie_topic:" + pastie.topic, id);
             }
             client.zincrby("leaderboard", 1, pastie.author);
             res.send(JSON.stringify({pastie: {id: id}}));
@@ -146,5 +175,5 @@ app.post('/pastie', function(req, res) {
   fn();
 });
 
-app.listen(4000);
+app.listen(read_config().port);
 console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
