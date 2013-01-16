@@ -64,8 +64,8 @@ app.get('/', function(req, res) {
   var config = read_config();
   client.zrangebyscore("leaderboard", "-inf", "+inf", function(err, users) {
     client.lrange("public_pasties", 0, 20, function(err, public_pasties) {
-      if (err) { 
-        return res.send(err); 
+      if (err) {
+        return res.send(err);
       }
       var remaining = public_pasties.length;
       if (!public_pasties.length) {
@@ -95,10 +95,19 @@ app.get('/', function(req, res) {
   });
 });
 
+app.get('/pastie/:id.html', function(req, res) {
+  client.hgetall("pastie:" + req.params.id, function(err, result) {
+    if (err) {
+      return res.send(err);
+    }
+    res.send(result.content);
+  });
+});
+
 app.get('/pastie/:id', function(req, res) {
   client.hgetall("pastie:" + req.params.id, function(err, result) {
-    if (err) { 
-      return res.send(err); 
+    if (err) {
+      return res.send(err);
     }
     res.setHeader("content-type", "text/plain");
     res.send(result.content);
@@ -148,8 +157,8 @@ app.post('/pastie', function(req, res) {
         pastie.created = (new Date()).getTime();
 
         client.hmset("pastie:" + id, pastie, function(err, result) {
-          if (err) { 
-            return res.send(err); 
+          if (err) {
+            return res.send(err);
           }
           client.lpush("user_pasties:" + pastie.author, id, function(err, result) {
             if (err) {
