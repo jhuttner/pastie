@@ -114,6 +114,8 @@ def main():
     res = save_pastie(options, config)
     if res["pastie"]["id"]:
       url = "%s:%d/pastie/%s" % (config["host"], config["port"], res["pastie"]["id"])
+      if res["pastie"]["is_html"]:
+        url += ".html"
       print url
     elif res["error"]:
       print res["error"]

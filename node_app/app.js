@@ -148,6 +148,7 @@ app.post('/pastie', function(req, res) {
         return fn();
       } else {
         var pastie = req.body.pastie;
+        var is_html = Boolean(~req.body.pastie.content.indexOf("<html>"));
 
         if (!pastie) {
           return res.send(JSON.stringify({"error": "invalid JSON passed"}));
@@ -174,7 +175,7 @@ app.post('/pastie', function(req, res) {
               client.lpush("pastie_topic:" + pastie.topic, id);
             }
             client.zincrby("leaderboard", 1, pastie.author);
-            res.send(JSON.stringify({pastie: {id: id}}));
+            res.send(JSON.stringify({pastie: {id: id, is_html: is_html}}));
           });
         });
       }
