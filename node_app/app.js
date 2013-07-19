@@ -1,5 +1,6 @@
 var fs = require('fs');
 var _ = require('underscore');
+var crypto = require('crypto');
 
 /**
  * Module dependencies.
@@ -104,12 +105,23 @@ app.get('/pastie/:id.html', function(req, res) {
   });
 });
 
+app.get('/pastie/:id.png', function(req, res) {
+  client.hgetall("pastie:" + req.params.id, function(err, result) {
+    if (err) {
+      return res.send(err);
+    }
+    res.setHeader("Content-Type", "image/png");
+    res.write(result.content, 'binary');
+		res.end();
+  });
+});
+
 app.get('/pastie/:id', function(req, res) {
   client.hgetall("pastie:" + req.params.id, function(err, result) {
     if (err) {
       return res.send(err);
     }
-    res.setHeader("content-type", "text/plain");
+    res.setHeader("Content-Type", "text/plain");
     res.send(result.content);
   });
 });
@@ -148,7 +160,8 @@ app.post('/pastie', function(req, res) {
         return fn();
       } else {
         var pastie = req.body.pastie;
-        var is_html = Boolean(~req.body.pastie.content.indexOf("<html>"));
+				pastie.content = new Buffer(pastie.content, 'base64').toString('binary');
+        var is_html = Boolean(~pastie.content.indexOf("<html>"));
 
         if (!pastie) {
           return res.send(JSON.stringify({"error": "invalid JSON passed"}));
