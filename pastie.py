@@ -6,6 +6,7 @@ import sys
 import fileinput
 import getpass
 import urllib2
+import base64
 
 try:
   import json
@@ -50,7 +51,7 @@ def save_pastie(options, config):
       break
     data.append(s)
 
-  payload = {"content": ''.join(data), "author": getpass.getuser()}
+  payload = {"content": base64.b64encode(''.join(data)), "author": getpass.getuser()}
 
   if options.description:
     payload["description"] = options.description;
