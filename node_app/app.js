@@ -35,6 +35,35 @@ var get_random_string = function(len) {
   return result;
 };
 
+var get_extension  = function(content) {
+  if (Boolean(~content.indexOf("<html>"))) {
+    return '.html';
+  } else {
+    var result = get_image_type(content);
+    if (result) {
+      return result;
+    }
+  }
+  return '';
+}
+
+var get_image_type = function(content) {
+  if (!content.indexOf("\xFF\xD8\xFF")) {
+    return '.jpeg'
+  } else if (!content.indexOf("GIF")){
+    return '.gif'
+  } else if (!content.indexOf("\x89\x50\x4e\x47\x0d\x0a")) {
+    return '.png'
+  } else if (!content.indexOf("BM")) {
+    return '.bmp';
+  } else if (!content.indexOf('8BPS')) {
+    return '.psd';
+  } else if (!content.indexOf('FWS')) {
+    return '.swf';
+  }
+  return null;
+};
+
 // Configuration
 
 app.configure(function(){
@@ -104,12 +133,23 @@ app.get('/pastie/:id.html', function(req, res) {
   });
 });
 
+app.get('/pastie/:id.:extension(jpeg|gif|png|bmp|psd|swf)', function(req, res) {
+  client.hgetall("pastie:" + req.params.id, function(err, result) {
+    if (err) {
+      return res.send(err);
+    }
+    res.setHeader("Content-Type", "image/" + req.params.extension);
+    res.write(result.content, 'binary');
+    res.end();
+  });
+});
+
 app.get('/pastie/:id', function(req, res) {
   client.hgetall("pastie:" + req.params.id, function(err, result) {
     if (err) {
       return res.send(err);
     }
-    res.setHeader("content-type", "text/plain");
+    res.setHeader("Content-Type", "text/plain");
     res.send(result.content);
   });
 });
@@ -148,7 +188,9 @@ app.post('/pastie', function(req, res) {
         return fn();
       } else {
         var pastie = req.body.pastie;
-        var is_html = Boolean(~req.body.pastie.content.indexOf("<html>"));
+        pastie.content = new Buffer(pastie.content, 'base64').toString('binary');
+        var is_html = Boolean(~pastie.content.indexOf("<html>"));
+        var is_img = get_image_type(pastie.content);
 
         if (!pastie) {
           return res.send(JSON.stringify({"error": "invalid JSON passed"}));
@@ -156,6 +198,7 @@ app.post('/pastie', function(req, res) {
 
         pastie.id = id;
         pastie.created = (new Date()).getTime();
+        pastie.extension = get_extension(pastie.content);
 
         client.hmset("pastie:" + id, pastie, function(err, result) {
           if (err) {
@@ -175,7 +218,7 @@ app.post('/pastie', function(req, res) {
               client.lpush("pastie_topic:" + pastie.topic, id);
             }
             client.zincrby("leaderboard", 1, pastie.author);
-            res.send(JSON.stringify({pastie: {id: id, is_html: is_html}}));
+            res.send(JSON.stringify({pastie: {id: id, extension: pastie.extension}}));
           });
         });
       }

@@ -6,6 +6,7 @@ import sys
 import fileinput
 import getpass
 import urllib2
+import base64
 
 try:
   import json
@@ -50,7 +51,7 @@ def save_pastie(options, config):
       break
     data.append(s)
 
-  payload = {"content": ''.join(data), "author": getpass.getuser()}
+  payload = {"content": base64.b64encode(''.join(data)), "author": getpass.getuser()}
 
   if options.description:
     payload["description"] = options.description;
@@ -113,9 +114,10 @@ def main():
   else:
     res = save_pastie(options, config)
     if res["pastie"]["id"]:
-      url = "%s:%d/pastie/%s" % (config["host"], config["port"], res["pastie"]["id"])
-      if res["pastie"]["is_html"]:
-        url += ".html"
+      url = "%s:%d/pastie/%s%s" % (config["host"],
+                                   config["port"],
+                                   res["pastie"]["id"],
+                                   res["pastie"]["extension"])
       print url
     elif res["error"]:
       print res["error"]

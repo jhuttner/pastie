@@ -43,6 +43,9 @@ h2 recent (without --private flag)
 each item in public_pasties
   p.pastie #{item.author} 
     span(style="display: inline-block; min-width: 4em")
+    - if (item.extension)
+      a(href="#{host}/pastie/#{item.id}#{item.extension}") #{item.id}
+    - else
       a(href="#{host}/pastie/#{item.id}") #{item.id}
     - if (item.description)
       =" " + item.description
