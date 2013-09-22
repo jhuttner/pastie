@@ -21,11 +21,6 @@ app.use(express.bodyParser());
  * Utility functions
  */
 
-var read_config = function() {
-  var data = fs.readFileSync('config.json');
-  return JSON.parse(data);
-};
-
 var get_random_string = function(len) {
   var s = "abcdefghijkmnopqrstuvwxyz";
   var result = '';
@@ -90,7 +85,6 @@ app.get('/pastie/user/:user', function(req, res){
 });
 
 app.get('/', function(req, res) {
-  var config = read_config();
   client.zrangebyscore("leaderboard", "-inf", "+inf", function(err, users) {
     client.lrange("public_pasties", 0, 20, function(err, public_pasties) {
       if (err) {
@@ -100,7 +94,7 @@ app.get('/', function(req, res) {
       if (!public_pasties.length) {
         res.render("index.jade", {
           title: "Pastie",
-          host: config.host + ":" + config.port,
+          host: process.env.PASTIE_HOST + ":" + process.env.PASTIE_PORT,
           leaderboard: users,
           public_pasties: public_pasties,
         });
@@ -112,7 +106,7 @@ app.get('/', function(req, res) {
             if (!remaining) {
               res.render("index.jade", {
                 title: "Pastie",
-                host: config.host + ":" + config.port,
+                host: process.env.PASTIE_HOST + ":" + process.env.PASTIE_PORT,
                 leaderboard: users,
                 public_pasties: public_pasties,
               });
@@ -228,5 +222,12 @@ app.post('/pastie', function(req, res) {
   fn();
 });
 
-app.listen(read_config().port);
-console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+if (!process.env.PASTIE_HOST || !process.env.PASTIE_PORT) {
+  console.log("ERR: you must set the PASTIE_HOST and PASTIE_PORT environment variables");
+} else {
+  console.log("PASTIE_HOST is", process.env.PASTIE_HOST);
+  console.log("PASTIE_PORT is", process.env.PASTIE_PORT);
+  app.listen(process.env.PASTIE_PORT);
+  console.log("Express server listening on port %d in %s mode", app.address().port, app.settings.env);
+}
+
