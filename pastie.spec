@@ -9,6 +9,7 @@ Vendor: AppNexus, Inc.
 Packager: DevOps <devops@appnexus.com>
 BuildRoot: %{_tmppath}/%{name}-%{version}-buildroot
 Requires: nodejs >= 0.12
+Requires: redis
 
 %description
 Pastie is a paste bin application similar to gist.github.com

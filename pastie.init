@@ -14,7 +14,7 @@ PROCESS_NAME="pastie"
 SERVER="$ROOT_DIR/node_app/app.js"
 LOG_FILE="/var/log/adnexus/pastie.log"
 
-LOCK_FILE="/var/lock/subsys/node-server"
+LOCK_FILE="/var/lock/subsys/pastie"
 
 do_start()
 {
