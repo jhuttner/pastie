@@ -10,8 +10,8 @@ import urllib2
 CONFIG_FILE_PATH = '/etc/pastie/config.json'
 CONFIG_FILE_EXAMPLE = '''
 {
-   "host": "https://pastie.yoursite.com",
-   "port": "3000" # This field is optional
+   "host": "http://your-pastie-server",
+   "port": "3000" # This field is optional - http:// defaults to port 80
 }
 '''
 

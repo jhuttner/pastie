@@ -84,6 +84,11 @@ app.configure('production', function(){
 
 // Routes
 
+app.get('/status', function(req, res) {
+  res.setHeader('Content-Type', 'text/plain');
+  res.send('ready: 1\n');
+});
+
 app.get('/', function(req, res) {
   var config = read_config();
   var public_pasties = [];
@@ -213,11 +218,7 @@ app.post('/pastie', function(req, res) {
   if (read_config().port) {
     port = read_config().port;
   } else {
-    if (read_config().host.indexOf('https') > -1) {
-      port = 443;
-    } else {
-      port = 80;
-    }
+    port = 80;
   }
   app.listen(port);
   console.log('Express server listening on port %d in %s mode', app.address().port, app.settings.env);
