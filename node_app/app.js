@@ -104,7 +104,7 @@ app.get('/', function(req, res) {
       });
     }
     client.hgetall('pastie_users', function(err, pastie_users) {
-      pastie_users_sorted = Object.keys(pastie_users).sort();
+      pastie_users_sorted = Object.keys(pastie_users || {}).sort();
       res.render('index.jade', {
         title: 'Pastie',
         host: config.host + ':' + config.port,
@@ -215,10 +215,10 @@ app.post('/pastie', function(req, res) {
 // Main
 (function() {
   var port;
-  if (read_config().port) {
-    port = read_config().port;
-  } else {
+  if (typeof read_config().port === 'undefined') {
     port = 80;
+  } else {
+    port = read_config().port;
   }
   app.listen(port);
   console.log('Express server listening on port %d in %s mode', app.address().port, app.settings.env);

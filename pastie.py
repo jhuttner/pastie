@@ -67,7 +67,6 @@ def delete_pastie(options, config):
   req = urllib2.Request(get_url(config) + '/pastie/' + options.delete)
   req.get_method = lambda: 'DELETE'
   res = urllib2.urlopen(req).read()
-  print "RES IS", res
   return json.loads(res)
 
 def save_pastie(options, config):
