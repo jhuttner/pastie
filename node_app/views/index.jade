@@ -1,51 +1,51 @@
-h1 Pastie, the secure internal paste bin.
-p Pastie  is a paste bin like gist.github.com.
-p However, Pastie runs on <b><i><u>your</u></i></b> network, so <b><i><u>you</u></i></b> control its visibility to the public Internet.
+h1 Pastie - the paste bin that runs on your network.
+p Pastie is a paste bin, similar to gist.github.com.
+p However, Pastie runs on <b><u>your</u></b> network, so <b><u>you</u></b> control its visibility to the public Internet.
 p
+p Pastie was created at AppNexus, and we run it in private IP space, so only users on our VPN can access it.
+p Employees use Pastie to share non-sensitive data with each other, such as code snippets and small diffs.
+p Pastie is open-source and available on GitHub: 
   a(href="https://github.com/jhuttner/pastie") https://github.com/jhuttner/pastie
 
-h2 install
-p 
-  span(class="instruction") Clone
-  span git clone git://github.com/jhuttner/pastie.git ; cd pastie
-
-p 
-  span(class="instruction") Edit the config
-  span vim config.json
-
-p 
-  span(class="instruction") $PATH
-  span ln -s pastie ~/bin/pastie
-
-p 
-  span(class="instruction") Run the server
-  span node node_app/app.js
+h2 notice
+p Pastie <b><u>should not</u></b> be used for sharing actual sensitive data like passwords or keys, nor should it be used programmatically by production services.  Pastie is not Redis.
+p
 
 h2 usage
 
-p $ cat sensitive.txt | pastie 
-p http://your-server.com/pastie/1xa82
+p 
+  span(style="display: inline-block; min-width: 250px")$ cat snippet | pastie
+  span # Create a pastie!
+p http://your-pastie-server.com/pastie/cafcre
+br
 
-p $ cat file.txt | pastie -d/--description "My description for this file."
+p 
+  span(style="display: inline-block; min-width: 250px")$ cat snippet | pastie -p
+  span # A link to this pastie will appear in the <b><u>recent public pasties</u></b> section below
+p 
+  span(style="display: inline-block; min-width: 250px")$ cat snippet | pastie -x 1
+  span # Auto-delete this pastie after 1 day
 
-p $ cat expires_in_one_day.txt | pastie -x/--expires 1d 
+p 
+  span(style="display: inline-block; min-width: 250px")$ pastie -d `pastie_id`
+  span # Delete the pastie with ID `pastie_id`
 
-p $ cat a_bit_more_sensitive.txt | pastie -p/--private
 
 h2 users
+each user,index in pastie_users_sorted
+  - if (index === pastie_users_sorted.length - 1)
+    span #{user} (#{pastie_users[user]})
+  - else
+    span #{user} (#{pastie_users[user]}), 
 
-ol
-each item, index in leaderboard
-  span #{item}
-  =(index !== leaderboard.length - 1 ? ", " : ".")
-
-h2 recent (without --private flag)
+h2 recent public pasties
 each item in public_pasties
-  p.pastie #{item.author} 
-    span(style="display: inline-block; min-width: 4em")
-    - if (item.extension)
-      a(href="#{host}/pastie/#{item.id}#{item.extension}") #{item.id}
-    - else
-      a(href="#{host}/pastie/#{item.id}") #{item.id}
-    - if (item.description)
-      =" " + item.description
+  p.pastie 
+  span(style="display: inline-block; min-width: 100px") #{item.author} 
+  span
+  - if (item.extension)
+    a(href="#{host}/pastie/#{item.id}#{item.extension}") #{item.id}
+  - else
+    a(href="#{host}/pastie/#{item.id}") #{item.id}
+  - if (item.description)
+    =" " + item.description
