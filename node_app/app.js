@@ -19,8 +19,12 @@ app.use(express.bodyParser());
 // Utility functions
 
 var read_config = function() {
-  var data = fs.readFileSync('/etc/pastie/config.json');
-  return JSON.parse(data);
+	try {
+		var data = fs.readFileSync('/etc/pastie/config.json');
+		return JSON.parse(data);
+	} catch (err) {
+		return {};
+	}
 };
 
 var get_random_string = function(len) {
