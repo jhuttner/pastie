@@ -30,7 +30,8 @@ rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root)
-  /usr/local/adnxs/%{name}/%{version}
+/etc/init.d/%{name}
+/usr/local/adnxs/%{name}/%{version}
 
 %post
 ln -sfn /usr/local/adnxs/%{name}/%{version} /usr/local/adnxs/%{name}/current
