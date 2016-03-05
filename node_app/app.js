@@ -90,7 +90,7 @@ app.configure('production', function(){
 
 app.get('/status', function(req, res) {
   res.setHeader('Content-Type', 'text/plain');
-  res.send('ready: 1\n');
+  return res.send('ready: 1\n');
 });
 
 app.get('/', function(req, res) {
@@ -130,7 +130,7 @@ app.get('/pastie/:id', function(req, res) {
       return res.send('No pastie exists with the provided ID. Perhaps the pastie expired?');
     } else {
       res.setHeader('Content-Type', 'text/plain');
-      res.send(result.content);
+      return res.send(result.content);
     }
   });
 });
@@ -139,9 +139,9 @@ app.delete('/pastie/:id', function(req, res) {
   client.del(['pastie:' + req.params.id], function(err, result) {
     res.setHeader('Content-Type', 'application/json');
     if (result === 0) {
-      res.send(JSON.stringify({'message': 'Error: No Pastie found with ID'}));
+      return res.send(JSON.stringify({'message': 'Error: No Pastie found with ID'}));
     } else {
-      res.send(JSON.stringify({'message': 'Pastie deleted successfully'}));
+      return res.send(JSON.stringify({'message': 'Pastie deleted successfully'}));
     }
   });
 });
@@ -151,7 +151,7 @@ app.get('/pastie/:id.html', function(req, res) {
     if (err) {
       return res.send(err);
     }
-    res.send(result.content);
+    return res.send(result.content);
   });
 });
 
@@ -188,7 +188,7 @@ app.post('/pastie', function(req, res) {
 
         client.hincrby('pastie_users', pastie.author, 1, function(err, result) {
           if (err) {
-            res.send(err);
+            return res.send(err);
           }
           client.hmset('pastie:' + id, pastie, function(err, result) {
             if (err) {
@@ -204,7 +204,7 @@ app.post('/pastie', function(req, res) {
               if (pastie.expiry) {
                 client.expire('pastie:' + id, pastie.expiry);
               }
-              res.send(JSON.stringify({pastie: {id: id, extension: pastie.extension}}));
+              return res.send(JSON.stringify({pastie: {id: id, extension: pastie.extension}}));
             });
           });
         });
