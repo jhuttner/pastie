@@ -24,6 +24,8 @@ except:
 parser = OptionParser(description='Pastie is a secure internal paste bin.')
 parser.add_option('-d', '--delete', dest='delete',
     help='delete an existing pastie')
+parser.add_option('-t', '--title', dest='title',
+    help='set a title')
 parser.add_option('-p', '--public', dest='public',
     action='store_true', help='create a public pastie (listed on pastie homepage)')
 parser.add_option('-x', '--expires', dest='expiry',
@@ -86,6 +88,9 @@ def save_pastie(options, config):
   if options.public:
     payload['public'] = 1;
 
+  if options.title:
+    payload['title'] = options.title;
+
   if options.expiry:
     payload['expiry'] = convert_expiry_to_seconds(options.expiry)
 
@@ -115,6 +120,8 @@ def main():
       url = '%s/pastie/%s%s' % (get_url(config),
                                 res['pastie']['id'],
                                 res['pastie']['extension'])
+      if res.get('title'):
+        url += '/' + res['title']
       print url
     elif res['error']:
       print res['error']

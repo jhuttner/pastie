@@ -2,32 +2,35 @@ h1 Pastie - the paste bin that runs on your network.
 p Pastie is a paste bin, similar to gist.github.com.
 p However, Pastie runs on <b><u>your</u></b> network, so <b><u>you</u></b> control its visibility to the public Internet.
 p
-p Pastie was created at AppNexus, and we run it in private IP space, so only users on our VPN can access it.
-p Employees use Pastie to share non-sensitive data with each other, such as code snippets and small diffs.
-p Pastie is open-source and available on GitHub: 
-  a(href="https://github.com/jhuttner/pastie") https://github.com/jhuttner/pastie
+p At AppNexus, we run Pastie in private IP space so that only our employees can access it.
+p Pastie is great for sharing non-sensitive data quickly, such as code snippets, small diffs, and log output.
+p Pastie is open-source and 
+  a(href="https://github.com/jhuttner/pastie") available on GitHub
 
-h2 notice
-p Pastie <b><u>should not</u></b> be used for sharing actual sensitive data like passwords or keys, nor should it be used programmatically by production services.  Pastie is not Redis.
+h2 note
+p <b><u>Do not</u></b> use Pastie for sharing actual sensitive data like passwords or keys.
+p <b><u>Do not</u></b> use Pastie programmatically in conjuction with production services.  Pastie is not Redis.
 p
 
 h2 usage
 
-p 
-  span(style="display: inline-block; min-width: 250px")$ cat snippet | pastie
+p
+  span(style="display: inline-block; min-width: 260px")$ cat snippet | pastie
   span # Create a pastie!
 p http://your-pastie-server.com/pastie/cafcre
 br
 
-p 
-  span(style="display: inline-block; min-width: 250px")$ cat snippet | pastie -p
+p
+  span(style="display: inline-block; min-width: 260px")$ cat snippet | pastie -p
   span # A link to this pastie will appear in the <b><u>recent public pasties</u></b> section below
-p 
-  span(style="display: inline-block; min-width: 250px")$ cat snippet | pastie -x 1
+p
+  span(style="display: inline-block; min-width: 260px")$ cat snippet | pastie -x 1
   span # Auto-delete this pastie after 1 day
-
-p 
-  span(style="display: inline-block; min-width: 250px")$ pastie -d `pastie_id`
+p
+  span(style="display: inline-block; min-width: 260px")$ cat snippet | pastie -t 07_log
+  span # Add a title to the pastie link
+p
+  span(style="display: inline-block; min-width: 260px")$ pastie -d `pastie_id`
   span # Delete the pastie with ID `pastie_id`
 
 
@@ -36,16 +39,22 @@ each user,index in pastie_users_sorted
   - if (index === pastie_users_sorted.length - 1)
     span #{user} (#{pastie_users[user]})
   - else
-    span #{user} (#{pastie_users[user]}), 
+    span #{user} (#{pastie_users[user]}),
 
 h2 recent public pasties
 each item in public_pasties
-  p.pastie 
-  span(style="display: inline-block; min-width: 100px") #{item.author} 
+  p.pastie
+  span(style="display: inline-block; min-width: 100px") #{item.author}
   span
   - if (item.extension)
-    a(href="#{host}/pastie/#{item.id}#{item.extension}") #{item.id}
+    - if (item.title)
+      a(href="/pastie/#{item.id}#{item.extension}/#{item.title}") #{item.id}/#{item.title}
+    - else
+      a(href="/pastie/#{item.id}#{item.extension}") #{item.id}
   - else
-    a(href="#{host}/pastie/#{item.id}") #{item.id}
+    - if (item.title)
+      a(href="/pastie/#{item.id}/#{item.title") #{item.id}/#{item.title}
+    - else
+      a(href="/pastie/#{item.id}") #{item.id}
   - if (item.description)
     =" " + item.description

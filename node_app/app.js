@@ -120,7 +120,7 @@ app.get('/', function(req, res) {
   });
 });
 
-app.get('/pastie/:id', function(req, res) {
+app.get('/pastie/:id/:title?', function(req, res) {
   client.hgetall('pastie:' + req.params.id, function(err, result) {
     if (err) {
       return res.send(err);
@@ -146,7 +146,7 @@ app.delete('/pastie/:id', function(req, res) {
   });
 });
 
-app.get('/pastie/:id.html', function(req, res) {
+app.get('/pastie/:id.html/:title?', function(req, res) {
   client.hgetall('pastie:' + req.params.id, function(err, result) {
     if (err) {
       return res.send(err);
@@ -204,7 +204,11 @@ app.post('/pastie', function(req, res) {
               if (pastie.expiry) {
                 client.expire('pastie:' + id, pastie.expiry);
               }
-              return res.send(JSON.stringify({pastie: {id: id, extension: pastie.extension}}));
+              var res_body = {pastie: {id: id, extension: pastie.extension}};
+              if (pastie.title) {
+                res_body.title = pastie.title;
+              }
+              return res.send(JSON.stringify(res_body));
             });
           });
         });
