@@ -19,12 +19,13 @@ app.use(express.bodyParser());
 // Utility functions
 
 var read_config = function() {
-	try {
-		var data = fs.readFileSync('/etc/pastie/config.json');
-		return JSON.parse(data);
-	} catch (err) {
-		return {};
-	}
+  // return {"host": "1075.jhuttner.user.nym2.adnexus.net", "port": "4002"};
+  try {
+    var data = fs.readFileSync('/etc/pastie/config.json');
+    return JSON.parse(data);
+  } catch (err) {
+    return {};
+  }
 };
 
 var get_random_string = function(len) {
@@ -120,51 +121,33 @@ app.get('/', function(req, res) {
   });
 });
 
+app.get('/pastie/:id.html/:title?', function(req, res) {
+  return send_pastie(req, res, req.params.id, 'text/html');
+});
+
+app.get('/pastie/:id.:extension(jpeg|gif|png|bmp|psd|swf)/:title?', function(req, res) {
+  return send_pastie(req, res, req.params.id, 'image/' + req.params.extension, 'binary');
+});
+
 app.get('/pastie/:id/:title?', function(req, res) {
-  client.hgetall('pastie:' + req.params.id, function(err, result) {
+  return send_pastie(req, res, req.params.id, 'text/plain');
+});
+
+var send_pastie = function(req, res, pastie_id, content_type, encoding) {
+  client.hgetall('pastie:' + pastie_id, function(err, result) {
     if (err) {
       return res.send(err);
     }
     else if (result === null || Object.keys(result).length === 0) {
-      res.setHeader('Content-Type', 'text/plain');
-      return res.send('No pastie exists with the provided ID. Perhaps the pastie expired?');
+      res.setHeader('Content-Type', content_type);
+      return res.send('No pastie exists with the provided ID. Perhaps the pastie expired? ID: ' + req.params.id);
     } else {
-      res.setHeader('Content-Type', 'text/plain');
-      return res.send(result.content);
+      res.setHeader('Content-Type', content_type);
+      res.write(result.content, encoding);
+      return res.end();
     }
   });
-});
-
-app.delete('/pastie/:id', function(req, res) {
-  client.del(['pastie:' + req.params.id], function(err, result) {
-    res.setHeader('Content-Type', 'application/json');
-    if (result === 0) {
-      return res.send(JSON.stringify({'message': 'Error: No Pastie found with ID'}));
-    } else {
-      return res.send(JSON.stringify({'message': 'Pastie deleted successfully'}));
-    }
-  });
-});
-
-app.get('/pastie/:id.html/:title?', function(req, res) {
-  client.hgetall('pastie:' + req.params.id, function(err, result) {
-    if (err) {
-      return res.send(err);
-    }
-    return res.send(result.content);
-  });
-});
-
-app.get('/pastie/:id.:extension(jpeg|gif|png|bmp|psd|swf)', function(req, res) {
-  client.hgetall('pastie:' + req.params.id, function(err, result) {
-    if (err) {
-      return res.send(err);
-    }
-    res.setHeader('Content-Type', 'image/' + req.params.extension);
-    res.write(result.content, 'binary');
-    res.end();
-  });
-});
+};
 
 app.post('/pastie', function(req, res) {
   var fn = function() {
@@ -175,8 +158,6 @@ app.post('/pastie', function(req, res) {
       } else {
         var pastie = req.body.pastie;
         pastie.content = new Buffer(pastie.content, 'base64').toString('binary');
-        var is_html = Boolean(~pastie.content.indexOf('<html>'));
-        var is_img = get_image_type(pastie.content);
 
         if (!pastie) {
           return res.send(JSON.stringify({'error': 'invalid JSON passed'}));
@@ -217,6 +198,17 @@ app.post('/pastie', function(req, res) {
   };
 
   fn();
+});
+
+app.delete('/pastie/:id', function(req, res) {
+  client.del(['pastie:' + req.params.id], function(err, result) {
+    res.setHeader('Content-Type', 'application/json');
+    if (result === 0) {
+      return res.send(JSON.stringify({'message': 'Error: No Pastie found with ID'}));
+    } else {
+      return res.send(JSON.stringify({'message': 'Pastie deleted successfully'}));
+    }
+  });
 });
 
 

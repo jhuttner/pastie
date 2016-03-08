@@ -53,6 +53,7 @@ def convert_expiry_to_seconds(text):
     return num*scalar
 
 def read_config():
+  # return {"host": "http://1075.jhuttner.user.nym2.adnexus.net", "port": "4002"}
   f = open(CONFIG_FILE_PATH)
   result = json.load(f)
   f.close()

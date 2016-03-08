@@ -39,7 +39,7 @@ each user,index in pastie_users_sorted
   - if (index === pastie_users_sorted.length - 1)
     span #{user} (#{pastie_users[user]})
   - else
-    span #{user} (#{pastie_users[user]}),
+    span #{user} (#{pastie_users[user]}),&nbsp;
 
 h2 recent public pasties
 each item in public_pasties
@@ -53,7 +53,7 @@ each item in public_pasties
       a(href="/pastie/#{item.id}#{item.extension}") #{item.id}
   - else
     - if (item.title)
-      a(href="/pastie/#{item.id}/#{item.title") #{item.id}/#{item.title}
+      a(href="/pastie/#{item.id}/#{item.title}") #{item.id}/#{item.title}
     - else
       a(href="/pastie/#{item.id}") #{item.id}
   - if (item.description)
